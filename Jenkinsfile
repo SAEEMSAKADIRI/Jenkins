@@ -1,22 +1,34 @@
 pipeline {
     agent any
 
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')   // Replace with Jenkins ID
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // Replace with Jenkins ID
+    }
+
     stages {
-        stage('Build') {
+        stage('Checkout') {
             steps {
-                echo 'Building the project...'
+                git branch: 'main', url: 'https://github.com/SAEEMSAKADIRI/Jenkins.git'
             }
         }
-        stage('Test') {
+
+        stage('Terraform Init') {
             steps {
-                echo 'Running tests...'
+                sh 'terraform init'
             }
         }
-        stage('Deploy') {
+
+        stage('Terraform Plan') {
             steps {
-                echo 'Deploying application...'
+                sh 'terraform plan -out=tfplan'
+            }
+        }
+
+        stage('Terraform Apply') {
+            steps {
+                sh 'terraform apply -auto-approve tfplan'
             }
         }
     }
 }
-
